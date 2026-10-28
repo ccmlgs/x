@@ -1,0 +1,97 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 0. Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // --- Helpers ---
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isEmailVerified() {
+      return request.auth.token.email_verified == true;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // --- Entity Validations ---
+
+    function isValidStudent(data) {
+      return data.keys().hasAll(['id', 'name', 'level']) &&
+             data.keys().size() <= 8 &&
+             data.id is string && data.id.size() <= 128 &&
+             data.name is string && data.name.size() <= 100 &&
+             data.level is string && data.level.size() <= 50;
+    }
+
+    function isValidRecord(data) {
+      return data.keys().hasAll(['id', 'studentId', 'date', 'offenseType', 'demeritPoints', 'schoolYear']) &&
+             data.keys().size() <= 10 &&
+             data.id is string && data.id.size() <= 128 &&
+             data.studentId is string && data.studentId.size() <= 128 &&
+             data.date is string &&
+             data.offenseType is string && data.offenseType.size() <= 100 &&
+             data.demeritPoints is number &&
+             data.schoolYear is string && data.schoolYear.size() <= 20;
+    }
+
+    function isValidAttendance(data) {
+      return data.keys().hasAll(['id', 'studentId', 'date', 'status', 'schoolYear']) &&
+             data.keys().size() <= 6 &&
+             data.id is string && data.id.size() <= 128 &&
+             data.status in ['present', 'absent', 'late', 'excused'];
+    }
+
+    // --- Collection Rules ---
+
+    match /students/{studentId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && isValidId(studentId) && isValidStudent(incoming());
+      allow update: if isSignedIn() && isValidStudent(incoming()) && (
+        incoming().diff(existing()).affectedKeys().hasOnly(['name', 'level', 'demeritPoints', 'parentName', 'parentEmail', 'parentPhone', 'updatedAt'])
+      );
+      allow delete: if isSignedIn(); // In a real app, restrict this to admins
+    }
+
+    match /records/{recordId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && isValidId(recordId) && isValidRecord(incoming());
+      allow update: if isSignedIn() && isValidRecord(incoming()) && (
+        incoming().diff(existing()).affectedKeys().hasOnly(['offenseType', 'description', 'demeritPoints', 'recommendation'])
+      );
+      allow delete: if isSignedIn();
+    }
+
+    match /attendance/{attendanceId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && isValidId(attendanceId) && isValidAttendance(incoming());
+      allow update: if isSignedIn() && isValidAttendance(incoming()) && (
+        incoming().diff(existing()).affectedKeys().hasOnly(['status'])
+      );
+      allow delete: if isSignedIn();
+    }
+
+    match /meetings/{meetingId} {
+      allow read: if isSignedIn();
+      allow write: if isSignedIn(); // Simplified for now
+    }
+
+    match /communications/{communicationId} {
+      allow read: if isSignedIn();
+      allow write: if isSignedIn(); // Simplified for now
+    }
+  }
+}

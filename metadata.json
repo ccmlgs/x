@@ -1,0 +1,6 @@
+{
+  "name": "DisciplinePro: School Committee Management System",
+  "description": "A comprehensive school discipline tracking system with AI-powered recommendations, multi-year spreadsheet records, attendance tracking, and parent communication tools.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["AI Recommendations", "Real-time Collaboration", "PDF Reporting"]
+}

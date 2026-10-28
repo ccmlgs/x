@@ -1,0 +1,103 @@
+{
+  "entities": {
+    "Student": {
+      "title": "Student",
+      "description": "Student profile information",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "level": { "type": "string" },
+        "demeritPoints": { "type": "number" },
+        "parentName": { "type": "string" },
+        "parentEmail": { "type": "string" },
+        "parentPhone": { "type": "string" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "name", "level"]
+    },
+    "DisciplineRecord": {
+      "title": "Discipline Record",
+      "description": "A record of a specific offense or incident",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "studentId": { "type": "string" },
+        "studentName": { "type": "string" },
+        "date": { "type": "string", "format": "date-time" },
+        "offenseType": { "type": "string" },
+        "description": { "type": "string" },
+        "demeritPoints": { "type": "number" },
+        "schoolYear": { "type": "string" },
+        "recommendation": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "studentId", "date", "offenseType", "demeritPoints", "schoolYear"]
+    },
+    "Attendance": {
+      "title": "Attendance",
+      "description": "Daily attendance record for a student",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "studentId": { "type": "string" },
+        "date": { "type": "string", "format": "date" },
+        "status": { "type": "string", "enum": ["present", "absent", "late", "excused"] },
+        "schoolYear": { "type": "string" }
+      },
+      "required": ["id", "studentId", "date", "status", "schoolYear"]
+    },
+    "Meeting": {
+      "title": "Meeting",
+      "description": "Scheduled parent-teacher meeting",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "studentId": { "type": "string" },
+        "teacherId": { "type": "string" },
+        "parentId": { "type": "string" },
+        "date": { "type": "string", "format": "date" },
+        "time": { "type": "string" },
+        "status": { "type": "string", "enum": ["scheduled", "completed", "cancelled"] },
+        "notes": { "type": "string" }
+      },
+      "required": ["id", "studentId", "date", "time", "status"]
+    },
+    "Communication": {
+      "title": "Communication",
+      "description": "Log of parent-teacher communication",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "studentId": { "type": "string" },
+        "type": { "type": "string", "enum": ["Email", "Phone", "Meeting", "Note"] },
+        "date": { "type": "string", "format": "date-time" },
+        "notes": { "type": "string" },
+        "senderId": { "type": "string" }
+      },
+      "required": ["id", "studentId", "type", "date", "notes"]
+    }
+  },
+  "firestore": {
+    "/students/{studentId}": {
+      "schema": "Student",
+      "description": "Collection of students"
+    },
+    "/records/{recordId}": {
+      "schema": "DisciplineRecord",
+      "description": "Collection of discipline records"
+    },
+    "/attendance/{attendanceId}": {
+      "schema": "Attendance",
+      "description": "Collection of attendance records"
+    },
+    "/meetings/{meetingId}": {
+      "schema": "Meeting",
+      "description": "Collection of scheduled meetings"
+    },
+    "/communications/{communicationId}": {
+      "schema": "Communication",
+      "description": "Collection of communication logs"
+    }
+  }
+}
